@@ -1,33 +1,29 @@
-import threading
+import os
+import sys
 
-class Elevator(Resource):
-    directionString = ["stationary", "up", "down"]
-    def __init__(self, lowest, highest, current):
-        """Initialize the Elevator instance with the lowest and highest possible floors as well as the current floor."""
-        self.bay        = bay
-        self.lowest     = lowest
-        self.highest    = highest
-        self.current    = current
-        self.capacity   = capacity
-        self.travelling = false
-        self.direction  = 0         # 1 (up), -1 (down)
-        self.stops      = []
-        self.arrivalTime= None
-        self._lock      = threading.Lock()
+"""GLOBAL VARIABLES"""
+peopleWaitingForElevator  = []  #List of people waiting for the elevator
+peopleInElevators         = []  #List of people currently in an elevator
+peopleInCompletedState    = []  #List of people who have completed their journey
+currentTime               = 0   #Current timestep
 
-    def __str__(self):
-        """Return string for printing current postion"""
-        with self._lock:
-            if self.travelling:
-                return "Elevator is travelling {direction} and is currently travelling from floor {cfloor} to {nfloor}.".format(direction = self.getString(), cfloor = self.current, nfloor = (self.current + self.direction))
-            else:
-                return "Elevator is currently waiting on floor {cfloor}".format(cfloor = self.current)
+sys.path.insert(
+  0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'helper')))
 
-    def addStop(self, floor):
-        if self.lowest <= floor <= self.highest:
-            with self._lock:
-                self.stops.append(floor)
-                return True
-        return False
-            
-    
+from elevator import Elevator
+from api import app
+
+
+def main():
+  elevator = Elevator(bay=1,
+                      lowestFloor=0,
+                      highestFloor=10,
+                      currentFloor=1,
+                      capacity=10)
+  print(elevator)
+
+
+
+
+if __name__ == '__main__':
+  main()
