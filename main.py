@@ -29,8 +29,7 @@ def positiveIntCheck(value):
   """Function to check if the provided integer is a valid positive integer"""
   ivalue = int(value)
   if ivalue <= 0:
-    raise argparse.ArgumentTypeError(
-      f"{value} is an invalid positive int value")
+    raise argparse.ArgumentTypeError(f"{value} is an invalid positive int value")
   return ivalue
 
 
