@@ -120,19 +120,23 @@ class Elevator():
             pass
           
           elif self.current in self.stops:                 #We have a stop, so we let people off/on.
+              logger.debug(f"Elevator {self.bay} is letting people on/off on floor {self.current}.")
               with self._lock:
                 self.stops.discard(self.current)
               exitCount = self.removePassengers()
               enterCount = self.addPassengers()
+              logger.debug(f"Elevator {self.bay} had {exitCount} step off and {enterCount} step on.")
               self.nextActionTime = 5 + exitCount + enterCount
           
           elif any(i > self.current for i in self.stops):  #We need to begin moving upwards.
+              logger.debug(f"Elevator {self.bay} is leaving floor {self.current} - going up.")
               self.direction = 1
               self.nextActionTime = 5
               if self.current + self.direction in self.stops:    #Handle deceleration
                 self.nextActionTime += 2
           
-          else:                                            #We need to begin moving downwards.    
+          else:                                            #We need to begin moving downwards.
+              logger.debug(f"Elevator {self.bay} is leaving floor {self.current} - going down.")
               self.direction = -1
               self.nextActionTime = 5
               if self.current + self.direction in self.stops:    #Handle deceleration
