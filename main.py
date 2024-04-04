@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 import threading
+import time
 
 sys.path.insert(
   0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'helper')))
@@ -117,6 +118,7 @@ def main():
 
     # 5) Increment the time step.
     currentTime += 1
+    time.sleep(1)
 
   #Simulation has completed
   completeEvent.set()
