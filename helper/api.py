@@ -1,5 +1,5 @@
 from flask import Flask, request
-from helper import elevatorDictionary, startEvent, stopEvent, completeEvent
+from helper import elevatorDictionary, startEvent, stopEvent, completeEvent, peopleDictionary, peopleQueue
 
 #GLOBAL VARIABLES
 app = Flask(__name__)  #The Flask API
