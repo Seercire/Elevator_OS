@@ -51,7 +51,7 @@ class Elevator():
     """Add a floor to the list of floors for the Elevator to stop on."""
     if self.lowest <= floor <= self.highest:
       with self._lock:
-        self.stops.append(floor)
+        self.stops.add(floor)
         return True
     return False
 
