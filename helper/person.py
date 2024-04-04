@@ -1,4 +1,4 @@
-from helper import peopleLock, peopleDictionary, peopleWaitingForElevator, peopleInElevators,
+from helper import peopleLock, peopleDictionary, peopleWaitingForElevator, peopleInElevators
 
 class Person():
 
