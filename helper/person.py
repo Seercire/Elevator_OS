@@ -1,3 +1,5 @@
+from helper import peopleLock, peopleDictionary, peopleWaitingForElevator, peopleInElevators,
+
 class Person():
 
   def __init__(self, identifier, startFloor, endFloor, timeTick):
@@ -34,6 +36,8 @@ class Person():
 
   def completeJourney(self, currentTime):
     """This function is called when a person has reached their destination."""
+    global peopleWaitingForElevator, peopleInElevators, peopleLock
+    
     with peopleLock:
       #Remove the person from all other lists.
       try:

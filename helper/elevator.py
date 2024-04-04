@@ -1,5 +1,5 @@
 import threading
-from helper import logger, peopleQueue, peopleDictionary, peopleWaitingForElevator, peopleInElevators, peopleLock
+from helper import logger, peopleQueue, peopleDictionary, peopleWaitingForElevator, peopleInElevators, peopleLock, currentTime
 
 
 
