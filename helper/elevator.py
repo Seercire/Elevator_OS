@@ -1,4 +1,7 @@
 import threading
+from helper import logger, peopleQueue, peopleDictionary, peopleWaitingForElevator, peopleInElevators, peopleLock
+
+
 
 
 class Elevator():
@@ -23,17 +26,27 @@ class Elevator():
     self.nextActionTime = 0
 
   def __str__(self):
-    """Return string for printing current postion"""
-    with self._lock:
-      if self.direction != 0:
-        return "Elevator is travelling {direction} and is currently travelling from floor {cfloor} to {nfloor}.".format(
-          direction=self.getString(),
-          cfloor=self.current,
-          nfloor=(self.current + self.direction))
-      else:
-        return "Elevator is currently waiting on floor {cfloor}".format(
-          cfloor=self.current)
+    """Return a string representation of the Elevator's current status."""
+    return f"{self.bay}|{self.current}|{self.directionString()}|{len(self.personList)}|{self.remainingCapacity()}"
+    
 
+  def directionString(self):
+    """Returns a single character designator for the direction of the elevator."""
+    match self.direction:
+      case 0:
+        return "S"
+      case 1:
+        return "U"
+      case -1:
+        return "D"
+      case _:
+        return "E"
+
+  def remainingCapacity(self):
+    """Returns the remaining capacity of the elevator."""
+    return self.capacity - len(self.personList)
+
+        
   def addStop(self, floor):
     """Add a floor to the list of floors for the Elevator to stop on."""
     if self.lowest <= floor <= self.highest:
@@ -42,68 +55,103 @@ class Elevator():
         return True
     return False
 
-  
-  def addPerson(self, person):
-    """Add a person to the list of people for the Elevator to pick up."""
-    if len(self.personList) < self.capacity:
-      with self._lock:
-        self.personList.append(person)
-        return True
-    return False
+
+  def removePassengers(self):
+    """Remove passengers from the elevator if this is their current floor."""
+    with self._lock:
+      with peopleLock:
+        #Generate a list of id's of people who are exiting on this floor.
+        peopleExiting = [id for id in self.personList if peopleDictionary[id].getEndFloor() == self.current]
+
+      #Remove the people from the dictionary.
+      for person in peopleExiting:
+        logger.info(f"{person} has gotten off of elevator {self.bay}.")
+        
+        #Remove their ID from the personList
+        self.personList.remove(person)
+
+        #Complete the person's journey.
+        peopleDictionary[person].completeJourney(currentTime)
+
+    return len(peopleExiting)
 
   
-  def getElevatorStatus(self):
-    """Return a string representation of the Elevator's current status."""
-    match self.direction:
-      case 0:
-        return "{floor}|{direction}|{count}".format(floor=self.current, direction="W", count=len(self.personList))
-      case 1:
-        return "{floor}|{direction}|{count}".format(floor=self.current, direction="U", count=len(self.personList))
-      case -1:
-        return "{floor}|{direction}|{count}".format(floor=self.current, direction="D", count=len(self.personList))
-      case _:
-        """This should never happen"""
-        return "ERROR"
+  def addPassengers(self):
+    """Add passengers to the elevator if they are waiting for this elvator on the current floor."""
+    global peopleLock, peopleWaitingForElevator, peopleInElevators
+    
+    with self._lock:
+      with peopleLock:
+        peopleEntering = [id for id in peopleWaitingForElevator if peopleDictionary[id].checkMatch(self.current, self.bay)]
+    
+        for person in peopleEntering:
+          #Ensure we have room on the elevator.
+          if len(self.personList) < self.capacity:
+            logger.info(f"{person} has gotten onto elevator {self.bay}.")
+            
+            #Add the person to the personList
+            self.personList.append(person)
 
-
+            #Add the person's stop to the elevator's stops.
+            self.addStop(peopleDictionary[person].getEndFloor())
+    
+            #Remove the person from the peopleWaitingForElevator list.
+            peopleWaitingForElevator.remove(person)
+            
+            #Add the person to the peopleInElevators list.
+            peopleInElevators.append(person)
+          else:
+            #We don't have room for this person, they will need to requeue.
+            logger.info(f"Elevator at capacity! Adding {person} back to peopleQueue")
+            peopleQueue.put(person)
+    
+    return len(peopleEntering)
+      
+  
   def timerTick(self):
     """Handles the next tick of the timer and calls any necessary actions."""
-    with self._lock:
-      if self.nextActionTime == 0:
-        #Handle the current action.
-
-        """
-        If the elevator is stationary, and there are no stops, then the elevator will wait.
-        If the elevator is stationary, and there are stops, then the elevator will begin travelling towards the next stop.
-        If the elevator is moving, then we determine if it has reached the next stop. If it has, then:
-          1) We set the new timer to 5 seconds + 1 second per person entering/exiting.
-          2) We remove the stop from the list of stops.
-        """
-        match self.direction:
-          case 0:
-            #Determine if we need to begin moving.
-            if len(self.stops) == 0:                         #No stops, so we wait.
-              pass
-            elif self.current in self.stops:                 #We have a stop, so we let people off/on.
-                exitCount = self.removePassengers()
-                enterCount = addPassengers(self.bay, self.current)
-                self.nextActionTime = 5 + exitCount + enterCount
-            elif any(i > self.current for i in self.stops):  #We need to begin moving upwards.
-                self.direction = 1
-                self.nextActionTime = 5
-            else:                                            #We need to begin moving downwards.    
-                self.direction = -1
-                self.nextActionTime = 5
-
-          case 1 | -1:
-            #Elevator is moving, determine if we need to stop.
-            self.current += self.direction  #Change the current floor.
-
-            #Determine if this is a stop floor, if it is then we stop the elevator.
-            if self.current in self.stops:
-              self.direction = 0
+    if self.nextActionTime == 0:
+      #Handle the current action.
+      match self.direction:
+        case 0:
+          #Determine if we need to begin moving.
+          if len(self.stops) == 0:                         #No stops, so we wait.
+            pass
           
-
-      if self.nextActionTime > 0:
-        self.nextActionTime -= 1
+          elif self.current in self.stops:                 #We have a stop, so we let people off/on.
+              with self._lock:
+                self.stops.discard(self.current)
+              exitCount = self.removePassengers()
+              enterCount = self.addPassengers()
+              self.nextActionTime = 5 + exitCount + enterCount
+          
+          elif any(i > self.current for i in self.stops):  #We need to begin moving upwards.
+              self.direction = 1
+              self.nextActionTime = 5
+              if self.current + self.direction in self.stops:    #Handle deceleration
+                self.nextActionTime += 2
+          
+          else:                                            #We need to begin moving downwards.    
+              self.direction = -1
+              self.nextActionTime = 5
+              if self.current + self.direction in self.stops:    #Handle deceleration
+                self.nextActionTime += 2
+  
+        case 1 | -1:
+          #Elevator is moving, determine if we need to stop.
+          self.current += self.direction  #Change the current floor.
+  
+          #Determine if this is a stop floor, if it is then we stop the elevator.
+          if self.current in self.stops:
+            self.direction = 0
+          else:
+            self.nextActionTime = 3
+            if self.current + self.direction in self.stops:  #Handle deceleration
+              self.nextActionTime += 2
+        case _:
+          """This should never happen"""
+          return "ERROR"
+          
+    if self.nextActionTime > 0:
+      self.nextActionTime -= 1
           
