@@ -8,7 +8,7 @@ sys.path.insert(
 from elevator import Elevator
 from api import runApp
 from person import Person
-from helper import elevatorDictionary, currentTime, setLoggingLevel, logger, peopleDictionary, peopleWaitingForElevator, peopleInCompletedState, startEvent, stopEvent, completeEvent
+from helper import elevatorDictionary, currentTime, setLoggingLevel, logger, peopleDictionary, peopleWaitingForElevator, peopleInCompletedState, startEvent, stopEvent, completeEvent, startTimeDictionary, stragglerCheckTimeStep, peopleQueue, peopleLock, elevatorDictionary
 
 
 
