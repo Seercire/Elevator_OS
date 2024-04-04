@@ -108,7 +108,7 @@ def main():
       elevator.timerTick()
 
     # 3) Check for stragglers
-    checkForStragglers()
+    checkForStragglers(currentTime)
 
     # 4) Check if everyone has completed their journey - if yes, print the final results and terminate the simulation.
     if len(peopleDictionary) == len(peopleInCompletedState):
