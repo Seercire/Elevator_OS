@@ -1,5 +1,5 @@
 from flask import Flask, request
-from helper import elevatorDictionary, startEvent, stopEvent, completeEvent, peopleDictionary, peopleQueue
+from helper import elevatorDictionary, startEvent, stopEvent, completeEvent, peopleDictionary, peopleQueue, logger
 
 #GLOBAL VARIABLES
 app = Flask(__name__)  #The Flask API
@@ -79,6 +79,7 @@ def addPersonToElevator(personID, elevatorID):
         elevatorDictionary[elevatorID].addStop(
           peopleDictionary[personID].startFloor)
         peopleDictionary[personID].setAssignedBay(elevatorID)
+        logger.debug(f"Person {personID} is now waiting for {elevatorID}.")
 
     return f"Person ID {personID} added to Elevator ID {elevatorID}", 200  # Returns a plain text response
   else:

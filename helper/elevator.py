@@ -51,6 +51,7 @@ class Elevator():
     """Add a floor to the list of floors for the Elevator to stop on."""
     if self.lowest <= floor <= self.highest:
       with self._lock:
+        logger.debug(f"Elevator {self.bay} will now stop on floor {floor}.")
         self.stops.add(floor)
         return True
     return False
@@ -144,8 +145,10 @@ class Elevator():
           #Determine if this is a stop floor, if it is then we stop the elevator.
           if self.current in self.stops:
             self.direction = 0
+            logger.debug(f"Elevator {self.bay} is stopping on floor {self.current}.")
           else:
             self.nextActionTime = 3
+            logger.debug(f"Elevator {self.bay} is passing by floor {self.current}.")
             if self.current + self.direction in self.stops:  #Handle deceleration
               self.nextActionTime += 2
         case _:
