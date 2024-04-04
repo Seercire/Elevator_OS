@@ -39,7 +39,7 @@ def simulation(command):
       return "Simulation is not running.", 200
 
 
-@app.route('/ElevatorStatus/<string:elevator_id>', methods=['GET'])
+@app.route('/ElevatorStatus/<string:elevatorID>', methods=['GET'])
 def getElevatorStatus(elevatorID):
   if startEvent.is_set():
     if elevatorID in elevatorDictionary:
