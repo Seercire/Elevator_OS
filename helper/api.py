@@ -86,4 +86,4 @@ def addPersonToElevator(personID, elevatorID):
 
 
 def runApp():
-  app.run(port=5000, debug=True, use_reloader=False)
+  app.run(port=5432, debug=True, use_reloader=False)
