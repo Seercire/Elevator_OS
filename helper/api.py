@@ -1,9 +1,8 @@
 from flask import Flask, request
-from helper import elevatorDictionary, startEvent, stopEvent, completeEvent, peopleDictionary, peopleQueue, logger
+from helper import elevatorDictionary, startEvent, stopEvent, completeEvent, peopleDictionary, peopleQueue, logger, peopleWaitingForElevator
 
 #GLOBAL VARIABLES
 app = Flask(__name__)  #The Flask API
-
 
 
 @app.route('/Simulation/<string:command>', methods=['GET', 'PUT'])
@@ -69,7 +68,7 @@ def getNextInput():
            methods=['PUT'])
 def addPersonToElevator(personID, elevatorID):
   """Adds a person's starting to the elevator's stop list and assigns the elevator to the person"""
-  global peopleDictionary, elevatorDictionary
+  global peopleDictionary, elevatorDictionary, peopleWaitingForElevator
 
   if startEvent.is_set():
     # At this point, personID and elevatorID are already extracted from the URL
@@ -79,6 +78,7 @@ def addPersonToElevator(personID, elevatorID):
         elevatorDictionary[elevatorID].addStop(
           peopleDictionary[personID].startFloor)
         peopleDictionary[personID].setAssignedBay(elevatorID)
+        peopleWaitingForElevator.append(personID)
         logger.debug(f"Person {personID} is now waiting for {elevatorID}.")
 
     return f"Person ID {personID} added to Elevator ID {elevatorID}", 200  # Returns a plain text response
