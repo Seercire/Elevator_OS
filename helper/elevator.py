@@ -50,10 +50,9 @@ class Elevator():
   def addStop(self, floor):
     """Add a floor to the list of floors for the Elevator to stop on."""
     if self.lowest <= floor <= self.highest:
-      with self._lock:
-        logger.debug(f"Elevator {self.bay} will now stop on floor {floor}.")
-        self.stops.add(floor)
-        return True
+      logger.debug(f"Elevator {self.bay} will now stop on floor {floor}.")
+      self.stops.add(floor)
+      return True
     return False
 
 
