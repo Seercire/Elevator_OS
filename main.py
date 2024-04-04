@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import threading
 
 sys.path.insert(
   0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'helper')))
@@ -111,7 +112,7 @@ def main():
 
     # 4) Check if everyone has completed their journey - if yes, print the final results and terminate the simulation.
     if len(peopleDictionary) == len(peopleInCompletedState):
-      printFinalResults()
+      logger.info("All people have completed their journey")
       break
 
     # 5) Increment the time step.
@@ -119,6 +120,9 @@ def main():
 
   #Simulation has completed
   completeEvent.set()
+
+  #Write output report
+  #printFinalResults()
 
   apiThread.join()
   logger.debug("Shutting down the process.")
