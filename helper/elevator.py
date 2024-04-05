@@ -71,7 +71,7 @@ class Elevator():
         self.personList.remove(person)
 
         #Complete the person's journey.
-        peopleDictionary[person].completeJourney(currentTime)
+        peopleDictionary[person].completeJourney()
 
     return len(peopleExiting)
 

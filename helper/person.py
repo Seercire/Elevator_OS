@@ -38,9 +38,9 @@ class Person():
     """Check if the person is on the current floor and waiting on the current bay."""
     return floor == self.startFloor and bay == self.assignedBay
 
-  def completeJourney(self, currentTime):
+  def completeJourney(self):
     """This function is called when a person has reached their destination."""
-    global peopleWaitingForElevator, peopleInElevators, peopleLock
+    global peopleWaitingForElevator, peopleInElevators, peopleLock, currentTime
     
     with peopleLock:
       #Remove the person from all other lists.
