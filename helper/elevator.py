@@ -1,5 +1,5 @@
 import threading
-from helper import logger, peopleQueue, peopleDictionary, peopleWaitingForElevator, peopleInElevators, peopleLock, currentTime
+from helper import logger, peopleQueue, peopleDictionary, peopleWaitingForElevator, peopleInElevators, peopleLock
 
 
 
@@ -57,9 +57,7 @@ class Elevator():
 
 
   def removePassengers(self, cTime):
-    """Remove passengers from the elevator if this is their current floor."""
-    global currentTime
-    
+    """Remove passengers from the elevator if this is their current floor."""    
     with self._lock:
       with peopleLock:
         #Generate a list of id's of people who are exiting on this floor.
@@ -125,7 +123,7 @@ class Elevator():
               logger.debug(f"Elevator {self.bay} is letting people on/off on floor {self.current}.")
               with self._lock:
                 self.stops.discard(self.current)
-              exitCount = self.removePassengers()
+              exitCount = self.removePassengers(cTime)
               enterCount = self.addPassengers()
               logger.debug(f"Elevator {self.bay} had {exitCount} step off and {enterCount} step on.")
               self.nextActionTime = 5 + exitCount + enterCount
