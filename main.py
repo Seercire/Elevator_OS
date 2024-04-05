@@ -231,29 +231,35 @@ def printFinalResults(reportFile, programStartTime, simulatorStartTime, simulato
   #Print the final results
   with open(reportFile, 'w') as file:
     file.write("----------  Runtime Data  ----------\n")
-    file.write(f"Program Start Time: {programStartTime}\n")
-    file.write(f"Simulation Start Time: {simulatorStartTime}\n")
-    file.write(f"Simulation End Time: {simulatorEndTime}\n")
+    file.write(f"Program Start Time: {time.ctime(programStartTime)}\n")
+    file.write(f"Simulation Start Time: {time.ctime(simulatorStartTime)}\n")
+    file.write(f"Simulation End Time: {time.ctime(simulatorEndTime)}\n")
     file.write(f"Total Time Steps: {currentTime}\n")
     file.write(f"Time Waiting for Simulation to Start: {simulatorStartTime - programStartTime}\n")
     file.write(f"Time Spent in Simulation: {simulatorEndTime - simulatorStartTime}\n")
     file.write(f"Total Time: {simulatorEndTime - programStartTime}\n")
     
-    file.write("----------  Elevator Data  ----------\n")
+    file.write("\n----------  Elevator Data  ----------\n")
     for elevator in elevatorDictionary.values():
       file.write(f"Elevator ID: {elevator.bay}\n" +
                  f"\tElevator End Floor: {elevator.current}\n" +
                  f"\tElevator Occupant Count: {occupantCountDictionary[elevator.bay]}\n")
-
+    
     file.write("\n----------  Person Data  ----------\n")
     file.write(f"Total People: {len(peopleDictionary)}\n")
     file.write(f"Person with Shortest Travel Time: {shortestTravelTimePerson}\n" +
+               f"\tElevator Bay: {peopleDictionary[shortestTravelTimePerson].assignedBay}\n" +
                f"\tStart Floor: {peopleDictionary[shortestTravelTimePerson].startFloor}\n" +
                f"\tEnd Floor: {peopleDictionary[shortestTravelTimePerson].endFloor}\n" +
+               f"\tStart Time: {peopleDictionary[shortestTravelTimePerson].startTime}\n" +
+               f"\tEnd Time: {peopleDictionary[shortestTravelTimePerson].endTime}\n" +
                f"\tTravel Time: {shortestTravelTime}\n")
     file.write(f"Person with Longest Travel Time: {longestTravelTimePerson}\n" + 
+               f"\tElevator Bay: {peopleDictionary[longestTravelTimePerson].assignedBay}\n" +
                f"\tStart Floor: {peopleDictionary[longestTravelTimePerson].startFloor}\n" +
                f"\tEnd Floor: {peopleDictionary[longestTravelTimePerson].endFloor}\n" + 
+               f"\tStart Time: {peopleDictionary[longestTravelTimePerson].startTime}\n" +
+               f"\tEnd Time: {peopleDictionary[longestTravelTimePerson].endTime}\n" +
                f"\tTravel Time: {longestTravelTime}\n")
 
       
