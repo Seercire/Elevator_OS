@@ -73,7 +73,9 @@ class Elevator():
         self.personList.remove(person)
 
         #Complete the person's journey.
+        print(f"OMG - {currentTime}")
         peopleDictionary[person].completeJourney(currentTime)
+        
 
     return len(peopleExiting)
 

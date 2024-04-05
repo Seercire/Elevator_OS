@@ -1,4 +1,4 @@
-from helper import peopleLock, peopleDictionary, peopleWaitingForElevator, peopleInElevators, peopleInCompletedState
+from helper import peopleLock, peopleDictionary, peopleWaitingForElevator, peopleInElevators, peopleInCompletedState, currentTime
 
 class Person():
 
@@ -48,5 +48,7 @@ class Person():
         pass
 
     #Move the person to the completed state and set their completed timestep.
+    print(f"OMG2 - {currentTime}")
+    print(f"OMG2 - {cTime}")
     self.endTime = cTime
     peopleInCompletedState.append(self.id)
