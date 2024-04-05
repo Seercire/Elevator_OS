@@ -2,7 +2,6 @@ import argparse
 import os
 import sys
 import threading
-import sys
 import time
 
 sys.path.insert(
@@ -121,7 +120,7 @@ def main():
 
     # 5) Increment the time step.
     currentTime += 1
-    time.sleep(1)
+    time.sleep(.99966)
 
   #Simulation has completed
   completeEvent.set()
@@ -131,7 +130,7 @@ def main():
   printFinalResults(parsedArgs.reportFileName, programStartTime, simulatorStartTime, simulatorEndTime)
 
   logger.debug("Shutting down the process.")
-  sys.exit()
+  os.exit(0)
 
 
 def readBuildingFile(filename):
