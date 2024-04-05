@@ -109,7 +109,7 @@ def main():
 
     # 2) For each elevator, run the time handler
     for elevator in elevatorDictionary.values():
-      elevator.timerTick()
+      elevator.timerTick(currentTime)
 
     # 3) Check for stragglers
     checkForStragglers(currentTime)

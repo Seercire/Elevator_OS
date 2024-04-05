@@ -56,7 +56,7 @@ class Elevator():
     return False
 
 
-  def removePassengers(self):
+  def removePassengers(self, cTime):
     """Remove passengers from the elevator if this is their current floor."""
     global currentTime
     
@@ -73,8 +73,7 @@ class Elevator():
         self.personList.remove(person)
 
         #Complete the person's journey.
-        print(f"OMG - {currentTime}")
-        peopleDictionary[person].completeJourney(currentTime)
+        peopleDictionary[person].completeJourney(cTime)
         
 
     return len(peopleExiting)
@@ -112,7 +111,7 @@ class Elevator():
     return len(peopleEntering)
       
   
-  def timerTick(self):
+  def timerTick(self, cTime):
     """Handles the next tick of the timer and calls any necessary actions."""
     if self.nextActionTime == 0:
       #Handle the current action.
