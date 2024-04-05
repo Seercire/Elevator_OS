@@ -241,9 +241,9 @@ def printFinalResults(reportFile, programStartTime, simulatorStartTime, simulato
     
     file.write("----------  Elevator Data  ----------\n")
     for elevator in elevatorDictionary.values():
-      file.write(f"Elevator ID: {elevator.id}\n" +
-                 f"\tElevator End Floor: {elevator.endFloor}\n" +
-                 f"\tElevator Occupant Count: {occupantCountDictionary[elevator.id]}\n")
+      file.write(f"Elevator ID: {elevator.bay}\n" +
+                 f"\tElevator End Floor: {elevator.current}\n" +
+                 f"\tElevator Occupant Count: {occupantCountDictionary[elevator.bay]}\n")
 
     file.write("\n----------  Person Data  ----------\n")
     file.write(f"Total People: {len(peopleDictionary)}\n")
