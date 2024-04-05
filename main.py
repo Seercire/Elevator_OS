@@ -120,7 +120,7 @@ def main():
 
     # 5) Increment the time step.
     currentTime += 1
-    time.sleep(.99966)
+    time.sleep(.99)
 
   #Simulation has completed
   completeEvent.set()
@@ -130,7 +130,7 @@ def main():
   printFinalResults(parsedArgs.reportFileName, programStartTime, simulatorStartTime, simulatorEndTime)
 
   logger.debug("Shutting down the process.")
-  os.exit(0)
+  os._exit(0)
 
 
 def readBuildingFile(filename):
