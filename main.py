@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 import threading
+import sys
 import time
 
 sys.path.insert(
@@ -11,7 +12,6 @@ from elevator import Elevator
 from api import runApp
 from person import Person
 from helper import currentTime, setLoggingLevel, logger, peopleDictionary, peopleWaitingForElevator, peopleInCompletedState, startEvent, stopEvent, completeEvent, startTimeDictionary, stragglerCheckTimeStep, peopleQueue, peopleLock, elevatorDictionary
-
 
 
 def readableFileCheck(path):
@@ -29,7 +29,8 @@ def positiveIntCheck(value):
   """Function to check if the provided integer is a valid positive integer"""
   ivalue = int(value)
   if ivalue <= 0:
-    raise argparse.ArgumentTypeError(f"{value} is an invalid positive int value")
+    raise argparse.ArgumentTypeError(
+      f"{value} is an invalid positive int value")
   return ivalue
 
 
@@ -38,18 +39,20 @@ def parseArguments():
   parser = argparse.ArgumentParser(description="CS4352 - Elevator Simulation")
 
   # Add the arguments
-  parser.add_argument(
-    "-b",
-    "--buildingFileName",
-    type=readableFileCheck,
-    required=True,
-    help="a required file path that leads to a readable building file")
-  parser.add_argument(
-    "-p",
-    "--peopleFileName",
-    type=readableFileCheck,
-    required=True,
-    help="a required file path that leads to a readable people file")
+  parser.add_argument("-b",
+                      "--buildingFileName",
+                      type=readableFileCheck,
+                      required=True,
+                      help="File path to the building file")
+  parser.add_argument("-p",
+                      "--peopleFileName",
+                      type=readableFileCheck,
+                      required=True,
+                      help="File path to the people file")
+  parser.add_argument("-r",
+                      "--reportFileName",
+                      required=True,
+                      help="File path to the output report file")
   parser.add_argument("-v",
                       "--verbose",
                       action="store_true",
@@ -58,14 +61,11 @@ def parseArguments():
                       "--debug",
                       action="store_true",
                       help="an optional flag to turn on debug verbose mode")
-  parser.add_argument(
-    "-t",
-    "--time",
-    type=positiveIntCheck,
-    default=18000,
-    help=
-    "an optional argument that sets the maximum number of time steps the simulation will run for. Default 18000"
-  )
+  parser.add_argument("-t",
+                      "--time",
+                      type=positiveIntCheck,
+                      default=18000,
+                      help="Max number of time steps.")
 
   # Parse the arguments
   args = parser.parse_args()
@@ -76,6 +76,9 @@ def parseArguments():
 
 def main():
   global currentTime, completeEvent
+
+  #Set the start time
+  programStartTime = time.time()
 
   # Parse the arguments
   parsedArgs = parseArguments()
@@ -93,6 +96,7 @@ def main():
   logger.debug("Waiting for the Simulation Start Event")
   startEvent.wait()
   logger.debug("Recieved the Simulation Start Event")
+  simulatorStartTime = time.time()
 
   # Start the simulation
   logger.debug("Beginning the Simulation")
@@ -121,12 +125,13 @@ def main():
 
   #Simulation has completed
   completeEvent.set()
+  simulatorEndTime = time.time()
 
   #Write output report
-  #printFinalResults()
+  printFinalResults(parsedArgs.reportFileName, programStartTime, simulatorStartTime, simulatorEndTime)
 
-  apiThread.join()
   logger.debug("Shutting down the process.")
+  sys.exit()
 
 
 def readBuildingFile(filename):
@@ -137,9 +142,12 @@ def readBuildingFile(filename):
     """File format: <bay> <lowest floor> <highest floor> <current floor> <capacity>"""
     for line in file:
       bay, lowest, highest, current, capacity = line.strip().split('\t')
-      logger.debug(
-        f"\tFound new elevator:\n\t\tbay:{bay}\n\t\tlowest/highest/current floors: {lowest}/{highest}/{current}\n\t\tcapacity: {capacity}"
-      )
+      logger.debug(f"\tFound new elevator:" + f"\n\t\tbay:{bay}" +
+                   f"\n\t\tlowest floor: {lowest}" +
+                   f"\n\t\thighest floor: {highest}" +
+                   f"\n\t\tcurrent floor: {current}" +
+                   f"\n\t\tcapacity: {capacity}")
+      
       elevatorDictionary[bay] = Elevator(bay,
                                          int(lowest),
                                          int(highest),
@@ -193,6 +201,63 @@ def checkForStragglers(currTime):
               f"Adding {person} back to peopleQueue as they appear to have been skipped."
             )
             peopleQueue.put(person)
+
+
+def printFinalResults(reportFile, programStartTime, simulatorStartTime, simulatorEndTime):
+  """Prints the final results of the simulation."""
+  global peopleDictionary, elevatorDictionary
+  #Report Variables
+  shortestTravelTime       = sys.maxsize
+  shortestTravelTimePerson = ""
+  longestTravelTime        = 0
+  longestTravelTimePerson  = ""
+  occupantCountDictionary  = {}
+
+  #Set up the count dictionary
+  for elevator in elevatorDictionary.keys():
+    occupantCountDictionary[elevator] = 0
+  
+
+  for person in peopleDictionary.values():
+    travelTime = person.getTravelTime()
+    occupantCountDictionary[person.assignedBay] += 1
+    if travelTime < shortestTravelTime:
+      shortestTravelTime = travelTime
+      shortestTravelTimePerson = person.id
+    if travelTime > longestTravelTime:
+      longestTravelTime = travelTime
+      longestTravelTimePerson = person.id
+
+  #Print the final results
+  with open(reportFile, 'w') as file:
+    file.write("----------  Runtime Data  ----------\n")
+    file.write(f"Program Start Time: {programStartTime}\n")
+    file.write(f"Simulation Start Time: {simulatorStartTime}\n")
+    file.write(f"Simulation End Time: {simulatorEndTime}\n")
+    file.write(f"Total Time Steps: {currentTime}\n")
+    file.write(f"Time Waiting for Simulation to Start: {simulatorStartTime - programStartTime}\n")
+    file.write(f"Time Spent in Simulation: {simulatorEndTime - simulatorStartTime}\n")
+    file.write(f"Total Time: {simulatorEndTime - programStartTime}\n")
+    
+    file.write("----------  Elevator Data  ----------\n")
+    for elevator in elevatorDictionary.values():
+      file.write(f"Elevator ID: {elevator.id}\n" +
+                 f"\tElevator End Floor: {elevator.endFloor}\n" +
+                 f"\tElevator Occupant Count: {occupantCountDictionary[elevator.id]}\n")
+
+    file.write("\n----------  Person Data  ----------\n")
+    file.write(f"Total People: {len(peopleDictionary)}\n")
+    file.write(f"Person with Shortest Travel Time: {shortestTravelTimePerson}\n" +
+               f"\tStart Floor: {peopleDictionary[shortestTravelTimePerson].startFloor}\n" +
+               f"\tEnd Floor: {peopleDictionary[shortestTravelTimePerson].endFloor}\n" +
+               f"\tTravel Time: {shortestTravelTime}\n")
+    file.write(f"Person with Longest Travel Time: {longestTravelTimePerson}\n" + 
+               f"\tStart Floor: {peopleDictionary[longestTravelTimePerson].startFloor}\n" +
+               f"\tEnd Floor: {peopleDictionary[longestTravelTimePerson].endFloor}\n" + 
+               f"\tTravel Time: {longestTravelTime}\n")
+
+      
+  
 
 
 if __name__ == '__main__':

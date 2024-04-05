@@ -24,6 +24,10 @@ class Person():
   def setAssignedBay(self, bay):
     self.assignedBay = bay
 
+  def getTravelTime(self):
+    """Returns the travel time between the starting and ending floors."""
+    return self.endTime - self.startTime
+    
   def getAssignedBay(self):
     return self.assignedBay
 

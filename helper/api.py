@@ -19,11 +19,7 @@ def simulation(command):
     elif command.lower(
     ) == 'stop':  #Stop the simulation and terminate the FLASK thread.
       stopEvent.set()
-      shutdown_function = request.environ.get('werkzeug.server.shutdown')
-      if shutdown_function is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-      shutdown_function()
-      return "Simulation stopped", 202
+      return "Simulation stopping", 202
 
     else:
       return "Invalid command", 400
