@@ -1,4 +1,4 @@
-from helper import peopleLock, peopleDictionary, peopleWaitingForElevator, peopleInElevators, peopleInCompletedState, currentTime
+from helper import peopleLock, peopleDictionary, peopleWaitingForElevator, peopleInElevators, peopleInCompletedState
 
 class Person():
 
@@ -14,12 +14,6 @@ class Person():
   def __str__(self):
     """Returns the formatted string for the personID, startFloor and endFloor."""
     return f"{self.id}|{self.startFloor}|{self.endFloor}"
-
-  def setEndTime(self, timeTick):
-    self.endTime = timeTick
-
-  def getEndTime(self):
-    return self.endTime
 
   def setAssignedBay(self, bay):
     self.assignedBay = bay
@@ -38,9 +32,9 @@ class Person():
     """Check if the person is on the current floor and waiting on the current bay."""
     return floor == self.startFloor and bay == self.assignedBay
 
-  def completeJourney(self):
+  def completeJourney(self, cTime):
     """This function is called when a person has reached their destination."""
-    global peopleWaitingForElevator, peopleInElevators, peopleLock, currentTime
+    global peopleWaitingForElevator, peopleInElevators, peopleLock
     
     with peopleLock:
       #Remove the person from all other lists.
@@ -54,5 +48,5 @@ class Person():
         pass
 
     #Move the person to the completed state and set their completed timestep.
-    self.setEndTime(currentTime)
+    self.endTime = cTime
     peopleInCompletedState.append(self.id)

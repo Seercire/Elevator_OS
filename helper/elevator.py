@@ -58,6 +58,8 @@ class Elevator():
 
   def removePassengers(self):
     """Remove passengers from the elevator if this is their current floor."""
+    global currentTime
+    
     with self._lock:
       with peopleLock:
         #Generate a list of id's of people who are exiting on this floor.
@@ -71,7 +73,7 @@ class Elevator():
         self.personList.remove(person)
 
         #Complete the person's journey.
-        peopleDictionary[person].completeJourney()
+        peopleDictionary[person].completeJourney(currentTime)
 
     return len(peopleExiting)
 
