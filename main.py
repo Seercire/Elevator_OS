@@ -111,7 +111,7 @@ def main():
       elevator.timerTick(currentTime)
 
     # 3) Check for stragglers
-    checkForStragglers(currentTime)
+    # checkForStragglers(currentTime)
 
     # 4) Check if everyone has completed their journey - if yes, print the final results and terminate the simulation.
     if len(peopleDictionary) == len(peopleInCompletedState):
@@ -194,7 +194,7 @@ def checkForStragglers(currTime):
   """Checks if there are any people waiting for an elevator when the queue to handle them is empty."""
   global peopleQueue, stragglerCheckTimeStep
   if currTime > stragglerCheckTimeStep:
-    stragglerCheckTimeStep += 60  #Set it one minute into the future before we do this check again
+    stragglerCheckTimeStep = currentTime + 60  #Set it one minute into the future before we do this check again
     if len(peopleQueue.queue) == 0:
       if currTime > max(startTimeDictionary.keys()):
         if len(peopleWaitingForElevator) > 0:
