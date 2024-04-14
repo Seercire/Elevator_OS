@@ -130,8 +130,8 @@ def main():
   printFinalResults(parsedArgs.reportFileName, programStartTime, simulatorStartTime, simulatorEndTime)
 
   if not stopEvent.is_set():
-  #Sleep 20 seconds so that the API thread can run a little longer so student code verify the elevator is offline.
-  time.sleep(20) 
+    #Sleep 20 seconds so that the API thread can run a little longer so student code verify the elevator is offline.
+    time.sleep(20) 
 
   logger.debug("Shutting down the process.")
   os._exit(0)
