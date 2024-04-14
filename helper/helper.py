@@ -10,7 +10,7 @@ startEvent               = threading.Event()  #The event that starts the simulat
 stopEvent                = threading.Event()  #The event that stops the simulation
 completeEvent            = threading.Event()  #The event that sees if the simulation has completed
 startTimeDictionary      = {}                 #A dictionary of people waiting for an elevator
-stragglerCheckTimeStep   = 0                  #Timestep at which we will next check for stragglers
+stragglerCheckTimeStep   = 60                 #Timestep at which we will next check for stragglers
 #API data
 peopleQueue              = Queue()            #The queue of people waiting for an elevator
 #People Data

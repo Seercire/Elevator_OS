@@ -20,7 +20,10 @@ class Person():
 
   def getTravelTime(self):
     """Returns the travel time between the starting and ending floors."""
-    return self.endTime - self.startTime
+    if self.endTime != None:
+      return self.endTime - self.startTime
+    else:
+      return currentTime
     
   def getAssignedBay(self):
     return self.assignedBay
