@@ -104,6 +104,11 @@ class Elevator():
           else:
             #We don't have room for this person, they will need to requeue.
             logger.info(f"Elevator at capacity! Adding {person} back to peopleQueue")
+            
+            #Remove the person from the peopleWaitingForElevator list.
+            peopleWaitingForElevator.remove(person)
+
+            #Readd to the queue.
             peopleQueue.put(person)
     
     return len(peopleEntering)
