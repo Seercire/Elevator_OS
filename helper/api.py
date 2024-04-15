@@ -70,14 +70,28 @@ def addPersonToElevator(personID, elevatorID):
     # At this point, personID and elevatorID are already extracted from the URL
     if personID in peopleDictionary:
       if elevatorID in elevatorDictionary:
-        # Add the person's starting floor to the elevator's stop list
-        elevatorDictionary[elevatorID].addStop(
-          peopleDictionary[personID].startFloor)
-        peopleDictionary[personID].setAssignedBay(elevatorID)
-        peopleWaitingForElevator.append(personID)
-        logger.debug(f"Person {personID} is now waiting for {elevatorID}.")
+        if (elevatorDictionary[elevatorID].lowest <=
+            peopleDictionary[personID].startFloor <=
+            elevatorDictionary[elevatorID].highest):
+          if (elevatorDictionary[elevatorID].lowest <=
+              peopleDictionary[personID].endFloor <=
+              elevatorDictionary[elevatorID].highest):
+            # Add the person's starting floor to the elevator's stop list
+            elevatorDictionary[elevatorID].addStop(
+              peopleDictionary[personID].startFloor)
+            peopleDictionary[personID].setAssignedBay(elevatorID)
+            peopleWaitingForElevator.append(personID)
+            logger.debug(f"Person {personID} is now waiting for {elevatorID}.")
 
-    return f"Person ID {personID} added to Elevator ID {elevatorID}", 200  # Returns a plain text response
+            return f"Person ID {personID} added to Elevator ID {elevatorID}", 200  # Returns a plain text response
+          else:
+            return f"Person ID {personID} cannot be assigned to Elevator ID {elevatorID} because their end floor is not within the elevator's range.", 400
+        else:
+          return f"Person ID {personID} cannot be assigned to Elevator ID {elevatorID} because their start floor is not within the elevator's range.", 400
+      else:
+        return f"Elevator ID {elevatorID} does not exist.", 400
+    else:
+      return f"Person ID {personID} does not exist.", 400
   else:
     return "Simulation is not running.", 400
 
@@ -125,6 +139,7 @@ def getElevatorStatus_A3():
   else:
     return "Simulation is not running.", 400
 
+
 @app.route('/AddPersonToElevator_A3', methods=['PUT'])
 def addPersonToElevator_A3():
   """Adds a person's starting to the elevator's stop list and assigns the elevator to the person"""
@@ -135,18 +150,35 @@ def addPersonToElevator_A3():
   except ValueError as e:
     return f"Invalid input: {e}", 400
 
+  """Adds a person's starting to the elevator's stop list and assigns the elevator to the person"""
+  global peopleDictionary, elevatorDictionary, peopleWaitingForElevator
+
   if startEvent.is_set():
     # At this point, personID and elevatorID are already extracted from the URL
     if personID in peopleDictionary:
       if elevatorID in elevatorDictionary:
-        # Add the person's starting floor to the elevator's stop list
-        elevatorDictionary[elevatorID].addStop(
-          peopleDictionary[personID].startFloor)
-        peopleDictionary[personID].setAssignedBay(elevatorID)
-        peopleWaitingForElevator.append(personID)
-        logger.debug(f"Person {personID} is now waiting for {elevatorID}.")
+        if (elevatorDictionary[elevatorID].lowest <=
+            peopleDictionary[personID].startFloor <=
+            elevatorDictionary[elevatorID].highest):
+          if (elevatorDictionary[elevatorID].lowest <=
+              peopleDictionary[personID].endFloor <=
+              elevatorDictionary[elevatorID].highest):
+            # Add the person's starting floor to the elevator's stop list
+            elevatorDictionary[elevatorID].addStop(
+              peopleDictionary[personID].startFloor)
+            peopleDictionary[personID].setAssignedBay(elevatorID)
+            peopleWaitingForElevator.append(personID)
+            logger.debug(f"Person {personID} is now waiting for {elevatorID}.")
 
-    return f"Person ID {personID} added to Elevator ID {elevatorID}", 200  # Returns a plain text response
+            return f"Person ID {personID} added to Elevator ID {elevatorID}", 200  # Returns a plain text response
+          else:
+            return f"Person ID {personID} cannot be assigned to Elevator ID {elevatorID} because their end floor is not within the elevator's range.", 400
+        else:
+          return f"Person ID {personID} cannot be assigned to Elevator ID {elevatorID} because their start floor is not within the elevator's range.", 400
+      else:
+        return f"Elevator ID {elevatorID} does not exist.", 400
+    else:
+      return f"Person ID {personID} does not exist.", 400
   else:
     return "Simulation is not running.", 400
 
