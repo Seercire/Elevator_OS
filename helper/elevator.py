@@ -22,6 +22,7 @@ class Elevator():
     self.stops = set()
     self.personList = []
     self.direction = 0
+    self.previousDirection = 0
     self._lock = threading.Lock()
     self.nextActionTime = 0
 
@@ -132,15 +133,32 @@ class Elevator():
               enterCount = self.addPassengers()
               logger.debug(f"Elevator {self.bay} had {exitCount} step off and {enterCount} step on.")
               self.nextActionTime = 5 + exitCount + enterCount
-          
-          elif any(i > self.current for i in self.stops):  #We need to begin moving upwards.
+
+          elif self.previousDirection == -1:               #We were going down, so we need to try to continue going down.
+            if any(i < self.current for i in self.stops):  #We need to begin moving upwards.
+              logger.debug(f"Elevator {self.bay} is leaving floor {self.current} - going down.")
+              self.direction = -1
+              self.nextActionTime = 5
+              if self.current + self.direction in self.stops:    #Handle deceleration
+                self.nextActionTime += 2
+                
+  
+            else:                                            #We need to begin moving downwards.
               logger.debug(f"Elevator {self.bay} is leaving floor {self.current} - going up.")
               self.direction = 1
               self.nextActionTime = 5
               if self.current + self.direction in self.stops:    #Handle deceleration
                 self.nextActionTime += 2
-          
-          else:                                            #We need to begin moving downwards.
+
+          else:                                          #We were going up or not moving so we try going up.
+            if any(i > self.current for i in self.stops):  #We need to begin moving upwards.
+              logger.debug(f"Elevator {self.bay} is leaving floor {self.current} - going up.")
+              self.direction = 1
+              self.nextActionTime = 5
+              if self.current + self.direction in self.stops:    #Handle deceleration
+                self.nextActionTime += 2
+
+            else:                                            #We need to begin moving downwards.
               logger.debug(f"Elevator {self.bay} is leaving floor {self.current} - going down.")
               self.direction = -1
               self.nextActionTime = 5
@@ -153,6 +171,7 @@ class Elevator():
   
           #Determine if this is a stop floor, if it is then we stop the elevator.
           if self.current in self.stops:
+            self.previousDirection = self.direction
             self.direction = 0
             logger.debug(f"Elevator {self.bay} is stopping on floor {self.current}.")
           else:
