@@ -5,7 +5,8 @@ import sys
 import threading
 import time
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'helper')))
+sys.path.insert(
+  0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'helper')))
 
 from elevator import Elevator
 from api import runApp
@@ -111,7 +112,7 @@ def main():
       elevator.timerTick(currentTime)
 
     # 3) Check for stragglers
-    # checkForStragglers(currentTime)
+    checkForStragglers(currentTime)
 
     # 4) Check if everyone has completed their journey - if yes, print the final results and terminate the simulation.
     if len(peopleDictionary) == len(peopleInCompletedState):
@@ -127,11 +128,12 @@ def main():
   simulatorEndTime = time.time()
 
   #Write output report
-  printFinalResults(parsedArgs.reportFileName, programStartTime, simulatorStartTime, simulatorEndTime)
+  printFinalResults(parsedArgs.reportFileName, programStartTime,
+                    simulatorStartTime, simulatorEndTime)
 
   if not stopEvent.is_set():
     #Sleep 20 seconds so that the API thread can run a little longer so student code verify the elevator is offline.
-    time.sleep(20) 
+    time.sleep(20)
 
   logger.debug("Shutting down the process.")
   os._exit(0)
@@ -150,7 +152,7 @@ def readBuildingFile(filename):
                    f"\n\t\thighest floor: {highest}" +
                    f"\n\t\tcurrent floor: {current}" +
                    f"\n\t\tcapacity: {capacity}")
-      
+
       elevatorDictionary[bay] = Elevator(bay,
                                          int(lowest),
                                          int(highest),
@@ -195,31 +197,37 @@ def checkForStragglers(currTime):
   global peopleQueue, stragglerCheckTimeStep
   if currTime > stragglerCheckTimeStep:
     stragglerCheckTimeStep = currentTime + 60  #Set it one minute into the future before we do this check again
-    if len(peopleQueue.queue) == 0:
-      if currTime > max(startTimeDictionary.keys()):
-        if len(peopleWaitingForElevator) > 0:
-          #People have not been handled.
-          for person in peopleWaitingForElevator:
-            logger.debug(
-              f"Adding {person} back to peopleQueue as they appear to have been skipped."
-            )
-            peopleQueue.put(person)
+
+    if peopleQueue.qsize() == 0:
+      #No one is in the queue.
+
+      stragglers = [
+        person for person in peopleDictionary.keys()
+        if peopleDictionary[person].getAssignedBay() is None
+        and peopleDictionary[person].startTime < currentTime - 30
+      ]
+      
+      for person in stragglers:
+        logger.debug(
+          f"Adding {person} back to queue as they appear to have been skipped."
+        )
+        peopleQueue.put(person)
 
 
-def printFinalResults(reportFile, programStartTime, simulatorStartTime, simulatorEndTime):
+def printFinalResults(reportFile, programStartTime, simulatorStartTime,
+                      simulatorEndTime):
   """Prints the final results of the simulation."""
   global peopleDictionary, elevatorDictionary
   #Report Variables
-  shortestTravelTime       = sys.maxsize
+  shortestTravelTime = sys.maxsize
   shortestTravelTimePerson = None
-  longestTravelTime        = 0
-  longestTravelTimePerson  = None
-  occupantCountDictionary  = {}
+  longestTravelTime = 0
+  longestTravelTimePerson = None
+  occupantCountDictionary = {}
 
   #Set up the count dictionary
   for elevator in elevatorDictionary.keys():
     occupantCountDictionary[elevator] = 0
-  
 
   for person in peopleDictionary.values():
     if person.endTime != None:
@@ -235,51 +243,83 @@ def printFinalResults(reportFile, programStartTime, simulatorStartTime, simulato
   #Print the final results
   with open(reportFile, 'w') as file:
     file.write("----------  Runtime Data  ----------\n")
-    file.write(f"Program Start Time:                   {time.ctime(programStartTime)}\n")
-    file.write(f"Simulation Start Time:                {time.ctime(simulatorStartTime)}\n")
-    file.write(f"Simulation End Time:                  {time.ctime(simulatorEndTime)}\n")
+    file.write(
+      f"Program Start Time:                   {time.ctime(programStartTime)}\n"
+    )
+    file.write(
+      f"Simulation Start Time:                {time.ctime(simulatorStartTime)}\n"
+    )
+    file.write(
+      f"Simulation End Time:                  {time.ctime(simulatorEndTime)}\n"
+    )
     file.write(f"Total Time Steps:                     {currentTime}\n")
-    file.write(f"Time Waiting for Simulation to Start: {simulatorStartTime - programStartTime}\n")
-    file.write(f"Time Spent in Simulation:             {simulatorEndTime - simulatorStartTime}\n")
-    file.write(f"Total Time:                           {simulatorEndTime - programStartTime}\n")
-    
+    file.write(
+      f"Time Waiting for Simulation to Start: {simulatorStartTime - programStartTime}\n"
+    )
+    file.write(
+      f"Time Spent in Simulation:             {simulatorEndTime - simulatorStartTime}\n"
+    )
+    file.write(
+      f"Total Time:                           {simulatorEndTime - programStartTime}\n"
+    )
+
     file.write("\n----------  Elevator Data  ----------\n")
     for elevator in elevatorDictionary.values():
-      file.write(f"Elevator ID: {elevator.bay}\n" +
-                 f"\tElevator End Floor:      {elevator.current}\n" +
-                 f"\tElevator Occupant Count: {occupantCountDictionary[elevator.bay]}\n")
-    
+      file.write(
+        f"Elevator ID: {elevator.bay}\n" +
+        f"\tElevator End Floor:      {elevator.current}\n" +
+        f"\tElevator Occupant Count: {occupantCountDictionary[elevator.bay]}\n"
+      )
+
     file.write("\n----------  Person Data  ----------\n")
     file.write(f"Total People: {len(peopleDictionary)}\n")
     if shortestTravelTimePerson != None:
-      file.write(f"Person with Shortest Travel Time: {shortestTravelTimePerson}\n" +
-                 f"\tElevator Bay: {peopleDictionary[shortestTravelTimePerson].assignedBay}\n" +
-                 f"\tStart Floor:  {peopleDictionary[shortestTravelTimePerson].startFloor}\n" +
-                 f"\tEnd Floor:    {peopleDictionary[shortestTravelTimePerson].endFloor}\n" +
-                 f"\tStart Time:   {peopleDictionary[shortestTravelTimePerson].startTime}\n" +
-                 f"\tEnd Time:     {peopleDictionary[shortestTravelTimePerson].endTime}\n" +
-                 f"\tTravel Time:  {shortestTravelTime}\n")
+      file.write(
+        f"Person with Shortest Travel Time: {shortestTravelTimePerson}\n" +
+        f"\tElevator Bay: {peopleDictionary[shortestTravelTimePerson].assignedBay}\n"
+        +
+        f"\tStart Floor:  {peopleDictionary[shortestTravelTimePerson].startFloor}\n"
+        +
+        f"\tEnd Floor:    {peopleDictionary[shortestTravelTimePerson].endFloor}\n"
+        +
+        f"\tStart Time:   {peopleDictionary[shortestTravelTimePerson].startTime}\n"
+        +
+        f"\tEnd Time:     {peopleDictionary[shortestTravelTimePerson].endTime}\n"
+        + f"\tTravel Time:  {shortestTravelTime}\n")
     else:
       file.write("Person with Shortest Travel Time: None\n")
 
     if longestTravelTimePerson != None:
-      file.write(f"Person with Longest Travel Time: {longestTravelTimePerson}\n" + 
-                 f"\tElevator Bay: {peopleDictionary[longestTravelTimePerson].assignedBay}\n" +
-                 f"\tStart Floor:  {peopleDictionary[longestTravelTimePerson].startFloor}\n" +
-                 f"\tEnd Floor:    {peopleDictionary[longestTravelTimePerson].endFloor}\n" + 
-                 f"\tStart Time:   {peopleDictionary[longestTravelTimePerson].startTime}\n" +
-                 f"\tEnd Time:     {peopleDictionary[longestTravelTimePerson].endTime}\n" +
-                 f"\tTravel Time:  {longestTravelTime}\n")
+      file.write(
+        f"Person with Longest Travel Time: {longestTravelTimePerson}\n" +
+        f"\tElevator Bay: {peopleDictionary[longestTravelTimePerson].assignedBay}\n"
+        +
+        f"\tStart Floor:  {peopleDictionary[longestTravelTimePerson].startFloor}\n"
+        +
+        f"\tEnd Floor:    {peopleDictionary[longestTravelTimePerson].endFloor}\n"
+        +
+        f"\tStart Time:   {peopleDictionary[longestTravelTimePerson].startTime}\n"
+        +
+        f"\tEnd Time:     {peopleDictionary[longestTravelTimePerson].endTime}\n"
+        + f"\tTravel Time:  {longestTravelTime}\n")
     else:
       file.write("Person with Longest Travel Time: None\n")
+    if len(peopleWaitingForElevator) > 0:
+      file.write("People Waiting for Elevator:\n")
+      for person in peopleWaitingForElevator:
+        file.write(f"\t{person}\n")
 
     file.write("\n----------  Final Statistics  ----------\n")
-    file.write(f"Total People:                       {len(peopleDictionary)}\n")
+    file.write(
+      f"Total People:                       {len(peopleDictionary)}\n")
     file.write(f"People Remaining in Queue:          {peopleQueue.qsize()}\n")
-    file.write(f"People Still Waiting for Elevator:  {len(peopleWaitingForElevator)}\n")
-    file.write(f"People Remaining in Elevators:      {len(peopleInElevators)}\n")
-    file.write(f"People Who Completed Their Journey: {len(peopleInCompletedState)}\n\n")
-    
+    file.write(
+      f"People Still Waiting for Elevator:  {len(peopleWaitingForElevator)}\n")
+    file.write(
+      f"People Remaining in Elevators:      {len(peopleInElevators)}\n")
+    file.write(
+      f"People Who Completed Their Journey: {len(peopleInCompletedState)}\n\n")
+
 
 if __name__ == '__main__':
   # Get the current hostname
@@ -287,13 +327,14 @@ if __name__ == '__main__':
 
   # List of blocked hostnames
   blockedHostnames = [
-      "quanah.hpcc.ttu.edu",
-      "login-20-25.hpcc.ttu.edu",
-      "login-20-26.hpcc.ttu.edu"
+    "quanah.hpcc.ttu.edu", "login-20-25.hpcc.ttu.edu",
+    "login-20-26.hpcc.ttu.edu"
   ]
 
   # Check if the current hostname is in the list of blocked hostnames
   if hostname in blockedHostnames:
-      sys.exit("Error: This script cannot be run on this server.  You must run it on a server that is not a login server.")
-  
+    sys.exit(
+      "Error: This script cannot be run on this server.  You must run it on a server that is not a login server."
+    )
+
   main()
