@@ -25,6 +25,10 @@ def simulation(command):
       return "Invalid command", 400
 
   elif request.method == 'GET':
+    #Require that provided was 'check'
+    if command.lower() != 'check':
+      return "Invalid command", 400
+    
     #Return the current status of the simulation
     if completeEvent.is_set():
       return "Simulation is complete.", 200
