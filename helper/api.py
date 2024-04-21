@@ -1,5 +1,5 @@
 from flask import Flask, request
-from helper import elevatorDictionary, startEvent, stopEvent, completeEvent, peopleDictionary, peopleQueue, logger, peopleWaitingForElevator
+from helper import elevatorDictionary, startEvent, stopEvent, completeEvent, peopleDictionary, peopleQueue, logger, peopleWaitingForElevator, peopleInElevators, peopleInCompletedState
 
 #GLOBAL VARIABLES
 app = Flask(__name__)  #The Flask API
@@ -68,7 +68,10 @@ def addPersonToElevator(personID, elevatorID):
 
   if startEvent.is_set():
     # At this point, personID and elevatorID are already extracted from the URL
-    if personID in peopleDictionary:
+    if (personID in peopleWaitingForElevator or personID in peopleInElevators or personID in peopleInCompletedState):
+      return f"Person ID {personID} was already assigned previously.", 400
+    
+    elif personID in peopleDictionary:
       if elevatorID in elevatorDictionary:
         if (elevatorDictionary[elevatorID].lowest <=
             peopleDictionary[personID].startFloor <=
@@ -76,6 +79,7 @@ def addPersonToElevator(personID, elevatorID):
           if (elevatorDictionary[elevatorID].lowest <=
               peopleDictionary[personID].endFloor <=
               elevatorDictionary[elevatorID].highest):
+            
             # Add the person's starting floor to the elevator's stop list
             elevatorDictionary[elevatorID].addStop(
               peopleDictionary[personID].startFloor)
@@ -135,7 +139,7 @@ def getElevatorStatus_A3():
     if request.data in elevatorDictionary:
       return f"{elevatorDictionary[request.data]}"
     else:
-      return "DNE"
+      return "DNE", 400
   else:
     return "Simulation is not running.", 400
 
@@ -155,7 +159,10 @@ def addPersonToElevator_A3():
 
   if startEvent.is_set():
     # At this point, personID and elevatorID are already extracted from the URL
-    if personID in peopleDictionary:
+    if (personID in peopleWaitingForElevator or personID in peopleInElevators or personID in peopleInCompletedState):
+      return f"Person ID {personID} was already assigned previously.", 400
+
+    elif personID in peopleDictionary:
       if elevatorID in elevatorDictionary:
         if (elevatorDictionary[elevatorID].lowest <=
             peopleDictionary[personID].startFloor <=
