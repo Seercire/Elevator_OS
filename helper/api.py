@@ -40,7 +40,7 @@ def getElevatorStatus(elevatorID):
     if elevatorID in elevatorDictionary:
       return f"{elevatorDictionary[elevatorID]}"
     else:
-      return "DNE"
+      return "DNE", 400
   else:
     return "Simulation is not running.", 400
 
