@@ -5,7 +5,7 @@
 #SBATCH --partition=quanah
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=36
-#SBATCH --time=00:20:00
+#SBATCH --time=00:50:00
 #SBATCH --mem-per-cpu=5370MB  #5.3GB per core
 
 
