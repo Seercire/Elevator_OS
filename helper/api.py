@@ -28,6 +28,8 @@ def simulation(command):
     #Return the current status of the simulation
     if completeEvent.is_set():
       return "Simulation is complete.", 200
+    elif stopEvent.is_set():
+      return "Simulation is stopped.", 200
     elif startEvent.is_set():
       return "Simulation is running.", 200
     else:
