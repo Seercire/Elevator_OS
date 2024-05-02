@@ -70,9 +70,10 @@ def addPersonToElevator(personID, elevatorID):
 
   if startEvent.is_set():
     # At this point, personID and elevatorID are already extracted from the URL
-    if (personID in peopleWaitingForElevator or personID in peopleInElevators or personID in peopleInCompletedState):
+    if (personID in peopleWaitingForElevator or personID in peopleInElevators
+        or personID in peopleInCompletedState):
       return f"Person ID {personID} was already assigned previously.", 400
-    
+
     elif personID in peopleDictionary:
       if elevatorID in elevatorDictionary:
         if (elevatorDictionary[elevatorID].lowest <=
@@ -81,7 +82,7 @@ def addPersonToElevator(personID, elevatorID):
           if (elevatorDictionary[elevatorID].lowest <=
               peopleDictionary[personID].endFloor <=
               elevatorDictionary[elevatorID].highest):
-            
+
             # Add the person's starting floor to the elevator's stop list
             elevatorDictionary[elevatorID].addStop(
               peopleDictionary[personID].startFloor)
@@ -108,17 +109,17 @@ def addPersonToElevator(personID, elevatorID):
 # The PUT APIs below behave like the original ones you encountered in Assignment #3
 @app.route('/Simulation_A3', methods=['GET', 'PUT'])
 def simulation_A3():
+  data = request.data.decode('utf-8').lower()
   if request.method == 'PUT':
     #Check which command was provided.
-    if request.data.lower() == 'start':  #Start the simulation
+    if data == 'start':  #Start the simulation
       if not startEvent.is_set():  # Check if simulation isn't already started
         startEvent.set()
         return "Simulation started", 202
       else:
         return "Simulation is already running.", 200
 
-    elif request.data.lower(
-    ) == 'stop':  #Stop the simulation and terminate the FLASK thread.
+    elif data == 'stop':  #Stop the simulation and terminate the FLASK thread.
       stopEvent.set()
       return "Simulation stopping", 202
 
@@ -137,9 +138,10 @@ def simulation_A3():
 
 @app.route('/ElevatorStatus_A3', methods=['GET'])
 def getElevatorStatus_A3():
+  data = request.data.decode('utf-8')
   if startEvent.is_set():
-    if request.data in elevatorDictionary:
-      return f"{elevatorDictionary[request.data]}"
+    if data in elevatorDictionary:
+      return f"{elevatorDictionary[data]}"
     else:
       return "DNE", 400
   else:
@@ -152,16 +154,17 @@ def addPersonToElevator_A3():
   global peopleDictionary, elevatorDictionary, peopleWaitingForElevator
 
   try:
-    personID, elevatorID = request.data.split('|')
+    data = request.data.decode('utf-8')
+    personID, elevatorID = data.split('|')
   except ValueError as e:
     return f"Invalid input: {e}", 400
-
   """Adds a person's starting to the elevator's stop list and assigns the elevator to the person"""
   global peopleDictionary, elevatorDictionary, peopleWaitingForElevator
 
   if startEvent.is_set():
     # At this point, personID and elevatorID are already extracted from the URL
-    if (personID in peopleWaitingForElevator or personID in peopleInElevators or personID in peopleInCompletedState):
+    if (personID in peopleWaitingForElevator or personID in peopleInElevators
+        or personID in peopleInCompletedState):
       return f"Person ID {personID} was already assigned previously.", 400
 
     elif personID in peopleDictionary:
