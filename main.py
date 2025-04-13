@@ -33,6 +33,12 @@ def positiveIntCheck(value):
       f"{value} is an invalid positive int value")
   return ivalue
 
+def valid_port(value):
+  """Function to check if the provided port numer is an integer in the required range"""
+  ivalue = int(value)
+  if ivalue < 1024 or ivalue > 65535:
+    raise argparse.ArgumentTypeError(f"Port {ivalue} must be between 1024 and 65535")
+  return ivalue
 
 def parseArguments():
   # Create the parser
@@ -66,6 +72,12 @@ def parseArguments():
                       type=positiveIntCheck,
                       default=18000,
                       help="Max number of time steps.")
+  parser.add_argument("-P",
+                      "--port",
+                      type=valid_port,
+                      required=True,
+                      help="Port number to run the Flask API on")
+
 
   # Parse the arguments
   args = parser.parse_args()
@@ -89,7 +101,7 @@ def main():
   readPeopleFile(parsedArgs.peopleFileName)
 
   # Start the API on a separate thread
-  apiThread = threading.Thread(target=runApp)
+  apiThread = threading.Thread(target=runApp, args=(parsedArgs.port,))
   apiThread.start()
 
   # Wait for the signal to begin the simulation
