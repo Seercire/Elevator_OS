@@ -195,9 +195,10 @@ def addPersonToElevator_A3():
     return "Simulation is not running.", 400
 
 @app.route('/healthcheck', methods=['GET'])
-"""Simple heartbeat endpoint to check if the service is running"""
 def healthcheck():
-    return 'OK', 200
+  """Simple heartbeat endpoint to check if the service is running"""
+  return 'OK', 200
+  
 
 
 
